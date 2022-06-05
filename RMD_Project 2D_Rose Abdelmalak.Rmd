@@ -1,0 +1,242 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+Rose Abdelmalak
+
+SCIENTIFIC QUESTION: What mutations and alternate splicing differences in DNA sequence exist between four different nucleotide sequence variants of the gene FRMD4A found amongst homo sapians, and how does that impact the homology in the structures of the protein?
+
+BACKGROUND: My gene of interest is the FERM Domain Containing 4A (FRMD4A) gene. This gene FERM domain-containing protein that regulates epithelial cell polarity. It is associatd with adherens junctions and actin cable formation which occurs in epithelial cell polarity (FERM domain-containing protein that regulates epithelial cell polarity). Previous research has shown a correlation between miss regulation of the FRMD4A gene, in particularly \>80% up regulation, and oral squamous cell carcinoma (Zheng et al 2016). The study done by Zheng et al revealed that Silencing FRMD4A gene reduced the proliferation of CAL27 cells and led to cell cycle arrest in the G1 phase, as well as significantly suppressing the migration and invasion capacity of CAL27 cells. Furthermore, As an inspiring dentist I am interested in oral squamous cell carcinoma and ways to prevent it. By understanding which variants of the FRMD4A gene have mutated protein structures that alter the function of the FRMD4A gene we can target those genes for therapy and treat for oral squamous cell carcinoma from very early stages (Reva et al 2011). DNA sequence of the four FRMD4A variants are extracted from the ncbi nucleotides database. Variant 1: <https://www.ncbi.nlm.nih.gov/nuccore/NM_018027.5> Variant 2: <https://www.ncbi.nlm.nih.gov/nuccore/NM_001318336.2> Variant 3: <https://www.ncbi.nlm.nih.gov/nuccore/NM_001318337.2> Variant 4: <https://www.ncbi.nlm.nih.gov/nuccore/NM_001318338>. The protein structures used for the homology modeling were extracted from SWISS protein and PDB. <https://swissmodel.expasy.org/repository/uniprot/Q9P2Q2>
+
+"FRMD4A FERM Domain Containing 4A [Homo Sapiens (Human)] - Gene - NCBI." Nih.Gov, <https://www.ncbi.nlm.nih.gov/gene/55691>. Accessed 5 June 2022.
+
+Reva, Boris, et al. "Predicting the Functional Impact of Protein Mutations: Application to Cancer Genomics." Nucleic Acids Research, vol. 39, no. 17, 2011, p. e118, <doi:10.1093/nar/gkr407>.
+
+Zheng, Xianghuai, et al. "FRMD4A: A Potential Therapeutic Target for the Treatment of Tongue Squamous Cell Carcinoma." International Journal of Molecular Medicine, vol. 38, no. 5, 2016, pp. 1443--1449, <doi:10.3892/ijmm.2016.2745>.
+
+SCIENTIFIC HYPOTHESIS: If the sequences of the four FRMD4A gene variants are altered through mutations and/or alternate splicing then they will exhibit differences in their protein structures.
+
+ANALYSIS: First, Multiple sequence alignment (msa) was performed on the DNA sequence from 4 variants of the FRMD4A gene which were extracted from the ncbi nucleotides database as fasta files. This data was visualized using pretty print to show the aligned sequences in a publication worthy figure. Second, Homology modeling was performed on the protein structures of the four variants of the FRMD4A gene. In order to do so I extracted the amino acid sequences of each of the variants as FASTA proteins. I then used those amino acid sequences to model the structures of the variants using the SWISS protein database.The PDB database was used in order to find and extract a template structure to model my variants on. In order to visualize the homology between these protein structures I created a heat map to see how each protein model varied from the other in terms of their modes and rmsip values which take into acount confirmation/ movement fluctuations. Finally, I used pymol to view my structures but displayed them in the rnootbook using the NGLVieweR package.
+
+```{r}
+library(Biostrings)
+library(msa)
+library(bio3d)
+library(NGLVieweR)
+```
+
+-   Biostrings is used for reading long strings of data. In this case biostrings is helpful in reading and maninpulating the nucelotide sequences by reading in the amino acid sequences, which then can be converted into codons, it can also count the length of sequences and along with many other functions.
+
+-   msa is used for multiple sequence alignment and includes a function called "msa pretty print" that cleans up the alignment and displays it as a publication worthy alignment. I used this package to compare the sequences of my four FRMD4A gene variants.
+
+-   bio3d is a package that allows us to analyze the structures of proteins by giving us the ability to read, write and process biomolecular structure, sequence and dynamics trajectory data. I used this package to perform homology modeling and compare the four protein structures associated with my FRMD4A gene variants.
+
+-   NGLVieweR is a package that allows us to code interactive 3D visualizations of molecular structures. I used this package to display the four protein structures associated with my four FRMD4A gene variants.
+
+MULTIPLE SEQUENCE ALIGNMENT
+
+Multiple Sequence Alignment often abbreviated as msa is a bioinformatics method in which DNA sequences are aligned and compared. Msa can be helpful in identifying which sequences are conserved and where mutations or alternate splicing may have occured. I used this bioinformatics method in my project in order to align the nucleotide sequence from the four FRMD4A gene variants that I obtained from ncbi as fasta files (linked above). msa then revealed the aligned sequences and placed a - in place of missing or deleted nucleotides, a ? when the sequence could not be identified and simply the nucleotide (A, T, C or G) when appropriate. By utalizing MSA I am able to determine which sequences were conserved and where there were variations in the sequences.
+
+```{r}
+# read in the fasta file with the DNA sequence of the 4 FRMD4A variants using readAAStringSet and assign to FRMD4A_unaligned (global variable) because we have yet to perform MSA
+system.file("tex", "texshade.sty", package="msa")
+
+FRMD4A_unaligned <- readAAStringSet("FRMD4A.fasta")
+
+#code check to ensure that all four variant sequences were imported
+length(FRMD4A_unaligned)
+
+#perform multiple sequence alignment using the function msa() and assign to FRMDA_MSA (global variable)
+FRMD4A_MSA <- msa(FRMD4A_unaligned)
+
+#print the full msa results using show= "complete"
+print(FRMD4A_MSA, show="complete")
+```
+
+```{r}
+#read in the sequences of the 4 FRMD4A variants seperatly 
+V1 <- readAAStringSet("Variant_1.fasta")
+V2 <- readAAStringSet("Variant_2.fasta")
+V3 <- readAAStringSet("Variant_3.fasta")
+V4 <- readAAStringSet("Variant_4.fasta")
+
+# created a function that calculates the number of nucleotides in each of the sequences of the four variants nd assigned it to the variable "length_variants"
+length_variants <- function(a) {
+   result <- nchar(a)
+   print(result)
+}
+
+#create a vector with all of the variants combined
+variants <- c(V1, V2, V3, V4)
+
+#run the function
+length_variants(variants)
+
+# created a second function that determines the difference between the sequence length in comparison with variant 1 and assigned it to the variable "length_difference"
+length_difference <- function(a, b) {
+   result <- nchar(a) - nchar(b)
+   print(result)
+}
+
+#perofmed the function on all of the variants in comparison with Variant 1
+length_difference(variants, V1)
+```
+
+MSA PRETTY PRINT
+
+msaPrettyPrint is the data analysis and visualization method that I chose to display my msa results. This analysis method highlights where all of the aligned sequences were conserved in blue. It also displays the sequence logo results at the top of the aligned sequences in order to display which nucleotides were conserved amongst all of the aligned sequences. 
+
+```{r}
+#use the msa package function "msaPrettyPrint()" to clean up the DNA sequence into a publication worthy sequence alignment.
+msaPrettyPrint(FRMD4A_MSA, output="tex", showNames="left", showLogo="top",
+logoColors="rasmol", shadingMode="functional", shadingModeArg="structure",
+showLegend=FALSE, askForOverwrite=FALSE)
+```
+
+![](msaPrettyPrint.png)
+
+HOMOLOGY MODELING
+
+Homology modeling is a bioinformatics method that compares different protein structures and contrasts their similarities and differences. Homology modeling was performed on four pdb files that were extracted from the SWISS model database. The four pdb files contain the protein structure of the four variants of the FRMD4A gene aligned above. 
+
+
+```{r}
+#create a vector with the names of the 4 protein structures of the 4 variants and assign to the variable ids
+ids <- c("1e5w","3u8z", "5xq0", "4cgk")
+```
+
+```{r}
+#obrain the pdb files for the ids using the function get.pdb and assign to raw.files
+raw.files <- get.pdb(ids, rm.alt=TRUE)
+```
+
+```{r}
+#code check to ensure we read in the correct pdb files
+head(raw.files)
+```
+
+```{r}
+#split the four pdb files with their corresponding protein PDB code using the function pdbsplit() and asign to splitpdbfiles
+splitpdbfiles1 <- pdbsplit(raw.files, ids)
+```
+
+```{r}
+splitpdbfiles <- (splitpdbfiles1[c(1,2,6,8)])
+```
+
+```{r}
+#code check to ensure I only included structure A for each pdb
+print(splitpdbfiles)
+```
+
+```{r}
+#use the function pdbaln to align the protein structures for analysis. Assign to the variable pdbs. Use exefile = "msa" to avoid having to install muscle. 
+pdbs <- pdbaln(splitpdbfiles, exefile='msa')
+```
+
+```{r}
+#code check to check the sequence idenity of the pdb files
+summary(c(seqidentity(pdbs)))
+```
+
+```{r}
+#perform normal mode analysis on the pdb structures
+modes2 <- nma.pdbs(pdbs, fit = TRUE, outpath= NULL, chain = "A")
+```
+```{r}
+print(modes2)
+```
+
+```{r}
+#plot the fluctuation data between the pdb files
+plot(modes2, pdbs, type="h")
+```
+
+HEATMAP
+Heatmaps are a way to display the magnitude of data and is a great way to visualize the level of variations using colors and shades. In this case I am using the heatmap in order to display the magnitude of similarity between the modes of my four protein structures using RMISP values. The darker the color, the hgher the magnitude of similarity between the protein structures. The reason that modes are helpful is because they account for fluctations and take into acount the most common conformations of the proteins.
+
+```{r}
+#Root mean square inner product
+#RMSIP is a measure for the similarity between two set of modes obtained from principal component or normal modes analysis.
+modes2$rmsip
+```
+
+```{r}
+#creating a heat map in order to plot the RSMIP values of the four protein structures that were calculated above
+#The darker the color of the square the higher the RSMIP value
+heatmap(modes2$rmsip, symm = TRUE)
+```
+
+3D PROTEIN STRUCTURES
+
+I am choosing to display my data by coding interactive 3D models for my four protein structures. This is a great way to visualize the protein structures and be able to move them around into different conformations. The structures were extracted using the 4 letter codes associated with each protein from the SWISS-Model database. 
+
+```{r}
+#using the function NGLVieweR we can extract and display protein #1 - 1w5w
+NGLVieweR("1e5w") %>%
+addRepresentation("cartoon")
+```
+
+```{r}
+#using the function NGLVieweR we can extract and display protein #2 - 3u8z
+NGLVieweR("3u8z") %>%
+addRepresentation("cartoon")
+```
+
+```{r}
+#using the function NGLVieweR we can extract and display protein #3 - 5xq0
+NGLVieweR("5xq0") %>%
+addRepresentation("cartoon")
+```
+
+```{r}
+#using the function NGLVieweR we can extract and display protein #4 - 4cgk
+NGLVieweR("4cgk") %>%
+addRepresentation("cartoon")
+```
+
+```{r}
+#using setSpin we can set the protein structure to continuously spin
+NGLVieweR("1e5w") %>%
+  stageParameters(backgroundColor = "white", zoomSpeed = 1) %>%
+  addRepresentation("cartoon",
+    param = list(name = "cartoon", colorScheme = "residueindex")
+  ) %>%
+  setSpin()
+
+NGLVieweR("3u8z") %>%
+  stageParameters(backgroundColor = "white", zoomSpeed = 1) %>%
+  addRepresentation("cartoon",
+    param = list(name = "cartoon", colorScheme = "residueindex")
+  ) %>%
+  setSpin()
+
+NGLVieweR("5xq0") %>%
+  stageParameters(backgroundColor = "white", zoomSpeed = 1) %>%
+  addRepresentation("cartoon",
+    param = list(name = "cartoon", colorScheme = "residueindex")
+  ) %>%
+  setSpin()
+
+NGLVieweR("4cgk") %>%
+  stageParameters(backgroundColor = "white", zoomSpeed = 1) %>%
+  addRepresentation("cartoon",
+    param = list(name = "cartoon", colorScheme = "residueindex")
+  ) %>%
+  setSpin()
+```
+
+ANALYSIS OF DATA
+
+The four sequences used in the multiple sequence alignment are four different isotope variants from the FRMD4A gene that were derived from the ncbi nuceliotide database. When multiple sequence alignment was performed the alignment revealed that the most amount of variation occurred at the beginning of the alignment and thus likely affective the enhancer and promoter regions of the FRMD4A gene. when compared to variant 1, variants 2 and 3 were longer sequences meanwhile variant 4 was significantly shorter. The sequence from Variant 2 did not begin until about 1kbp into the msa.  
+
+In order to test the effect of the different DNA sequences on the protein structure, Homology modeling was performed using may bio3d methods and functions. First the protein structures were read in as pdb files extracted from the SWISS model database, they structures were aligned and the mode analysis was performed. I specifically looked at the Root mean square inner product often abbreviated as RMSIP which yielded me a chart with scores from 1 - 0 with 1 being most identical and 0 being the least identical when it comes to mode and the structure conformations/ movement. The heatmap displays the results of the mode and RSMIP results well and shows that struture 1e5w (variant 1) which I used as the target protein was most similar to structure 3u8z (variant 2) their rismp score was 0.65 which is an excellent-fair score according to the journal of molecular graphics and modeling (David & Jacobs, 2011). When the structures of variants 3 and 4 were compared with variant 1 they yielded rmsip scores of 0.3828 and 0.3794 which are below the "fair" thershold determined above.The results displayed in the heat map can also be validated by the fluctuation plot which shows structure 3u8z (variant 2) to only have 1 main fluctuation when compared with structure 4cgk (variant 4) which has about 6 main fluctation peaks. 
+
+Overall, my hypothesis was correct that the mutations and alternate splicing that differentiated the four variants of the FRMD4A gene had an impact on the structure of the proteins which they translated as the protein structures were signifigantly different form one another due to their nucelotide sequence differences.
+
+David, C. C., & Jacobs, D. J. (2011). Characterizing protein motions from structure. Journal of Molecular Graphics & Modelling, 31, 41–56. https://doi.org/10.1016/j.jmgm.2011.08.004
+
+
+
+
