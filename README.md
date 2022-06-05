@@ -1,0 +1,2 @@
+# Project-2-Final_-2D_Rose-Abdelmalak
+Project 2 Final: My attempt to answer the scientific question: What mutations and alternate splicing differences in DNA sequence exist between four different nucleotide sequence variants of the gene FRMD4A found amongst homo sapians, and how does that impact the homology in the structures of the protein? Through the scientific Hypothesis: If the sequences of the four FRMD4A gene variants are altered through mutations and/or alternate splicing then they will exhibit differences in their protein structures.
